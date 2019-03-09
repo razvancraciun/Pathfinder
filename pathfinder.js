@@ -9,8 +9,8 @@ window.onload = () => {
 
 	let over = document.getElementById('over');
 	let oct = canvas.getContext('2d');
-	over.addEventListener('mousemove', mouseMoved);
-	//over.addEventListener('mousedown', mouseDown);
+	canvas.addEventListener('mousemove', mouseMoved);
+	canvas.addEventListener('mousedown', mouseDown);
 
 	let squareWidth = canvas.width / cols;
 	let squareHeight = canvas.height / rows;
@@ -24,6 +24,7 @@ window.onload = () => {
 	};
 	field = createCanvas();
 	drawField();
+	let graph = generateGraph();
 
 	function createCanvas() {
 		let field = [];
@@ -51,12 +52,18 @@ window.onload = () => {
 	}
 
 	function mouseDown(event) {
-		//?
+		let lastClickedAt = {
+			x : clickedAt.x,
+			y : clickedAt.y
+		};
 		if (field[mouseAt.y * cols + mouseAt.x] >= obstacleChance) {
 			clickedAt.x = mouseAt.x;
 			clickedAt.y = mouseAt.y;
 			oct.fillStyle = 'blue';
 			oct.fillRect(mouseAt.x * squareWidth, mouseAt.y * squareHeight, squareWidth, squareHeight);
+		}
+		if (lastClickedAt.x != -1 && lastClickedAt.y != -1) {
+			findPath(lastClickedAt.y * cols + lastClickedAt.x, clickedAt.y * cols + clickedAt.x);
 		}
 	}
 
@@ -80,9 +87,50 @@ window.onload = () => {
 				ctx.fillRect(j * squareWidth, i * squareHeight, squareWidth, squareHeight);
 			}
 		}
-		/*if (clickedAt[0] != -1 && clickedAt[1] != -1) {
-			ctx.fillStyle = 'blue';
-			ctx.fillRect(clickedAt[0] * squareWidth, clickedAt[1] * squareHeight, squareWidth, squareHeight);
-		} */
+		if (clickedAt.x != -1 && clickedAt.y != -1) {
+			oct.fillStyle = 'blue';
+			oct.fillRect(clickedAt.x * squareWidth, clickedAt.y * squareHeight, squareWidth, squareHeight);
+		}
+	}
+
+	function findPath(v1, v2) {
+		console.log(v1 + ' ' + v2);
+		//run dijkstra
+	}
+
+	function generateGraph() {
+		let graph = [];
+		for (var i = 0; i < field.length; i++) {
+			graph[i] = [];
+		}
+		for (var i = 0; i < rows; i++) {
+			for (var j = 0; j < cols; j++) {
+				if (field[i * cols + j] >= obstacleChance) {
+					if (field[i * cols + j + 1] >= obstacleChance && j + 1 < cols) {
+						//right
+						graph[i * cols + j].push(i * cols + j + 1);
+					}
+					if (field[(i - 1) * cols + j] >= obstacleChance && i - 1 >= 0) {
+						//up
+						graph[i * cols + j].push((i - 1) * cols + j);
+					}
+					if (field[(i + 1) * cols + j] >= obstacleChance && i + 1 < rows) {
+						//down
+						graph[i * cols + j].push((i + 1) * cols + j);
+					}
+					if (field[i * cols + j - 1] >= obstacleChance && j - 1 >= 0) {
+						//left
+						graph[i * cols + j].push(i * cols + j - 1);
+					}
+				}
+			}
+		}
+		return graph;
+	}
+
+	function logGraph(graph) {
+		for (let i = 0; i < graph.length; i++) {
+			console.log(i + '->' + graph[i]);
+		}
 	}
 };
