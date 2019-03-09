@@ -1,0 +1,11 @@
+canvas {
+	position: absolute;
+}
+
+#field {
+	/*background-color: black*/
+}
+
+#over {
+	opacity: 0.2;
+}
