@@ -5,7 +5,9 @@ An application that runs [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Di
 ## Installation
 
 To run this application just download the repository on your local machine and open the **index.html** file 
-using your favorite web browser
+using your favorite web browser.
+
+ ***Note:** your browser should support ECMAScript 2016*
 
 ## Authors
 
