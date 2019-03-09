@@ -1,6 +1,6 @@
 # Pathfinder
 
-An application that runs Dijkstra's algorithm to find the shortest path between two points on a grid. 
+An application that runs [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) to find the shortest path between two points on a grid. 
 
 ## Installation
 
