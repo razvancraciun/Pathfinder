@@ -1,6 +1,6 @@
-let rows = 10;
-let cols = 10;
-let obstacleChance = 0.3;
+let rows = 100;
+let cols = 100;
+let obstacleChance = 0.2;
 var field = [];
 
 window.onload = () => {
@@ -9,8 +9,8 @@ window.onload = () => {
 
 	let over = document.getElementById('over');
 	let oct = canvas.getContext('2d');
-	canvas.addEventListener('mousemove', mouseMoved);
-	canvas.addEventListener('mousedown', mouseDown);
+	over.addEventListener('mousemove', mouseMoved);
+	over.addEventListener('mousedown', mouseDown);
 
 	let squareWidth = canvas.width / cols;
 	let squareHeight = canvas.height / rows;
@@ -22,6 +22,8 @@ window.onload = () => {
 		x : -1,
 		y : -1
 	};
+	let path = [];
+	let drawnPath = [];
 	field = createCanvas();
 	drawField();
 	let graph = generateGraph();
@@ -63,7 +65,21 @@ window.onload = () => {
 			oct.fillRect(mouseAt.x * squareWidth, mouseAt.y * squareHeight, squareWidth, squareHeight);
 			if (lastClickedAt.x != -1 && lastClickedAt.y != -1 && field) {
 				let dist = findPath(lastClickedAt.y * cols + lastClickedAt.x, clickedAt.y * cols + clickedAt.x);
-				console.log('Result:' + dist);
+				drawnPath = [];
+				if (dist.found) {
+					setTimeout(
+						function addToDrawnPath(i) {
+							if (i < path.length) {
+								drawnPath.push(path[i]);
+								drawField();
+								setTimeout(addToDrawnPath, 1000 / path.length, i + 1);
+							}
+						},
+						1000 / path.length,
+						0
+					);
+				}
+				drawField();
 			}
 		}
 	}
@@ -92,15 +108,27 @@ window.onload = () => {
 			oct.fillStyle = 'blue';
 			oct.fillRect(clickedAt.x * squareWidth, clickedAt.y * squareHeight, squareWidth, squareHeight);
 		}
+
+		for (let i = 0; i < drawnPath.length; i++) {
+			oct.fillRect(
+				(drawnPath[i] % cols) * squareWidth,
+				Math.floor(drawnPath[i] / cols) * squareHeight,
+				squareWidth,
+				squareHeight
+			);
+		}
 	}
 
 	function findPath(v1, v2) {
+		path = [];
 		let dist = [];
 		let queue = [];
+		let parent = [];
 		for (let i = 0; i < graph.length; i++) {
 			dist.push(Number.MAX_SAFE_INTEGER);
 		}
 		dist[v1] = 0;
+		parent[v1] = -1;
 		queue.unshift(v1);
 
 		while (queue.length > 0) {
@@ -118,6 +146,7 @@ window.onload = () => {
 				if (alt < dist[u]) {
 					dist[u] = alt;
 					queue.unshift(u);
+					parent[u] = v;
 					if (u == v2) {
 						found = true;
 						return;
@@ -125,10 +154,21 @@ window.onload = () => {
 				}
 			});
 			if (found === true) {
-				return dist[v2];
+				let node = v2;
+				while (node != -1) {
+					path.unshift(node);
+					node = parent[node];
+				}
+				return {
+					dist  : dist[v2],
+					path  : path,
+					found : true
+				};
 			}
 		}
-		return 'No path found';
+		return {
+			found : false
+		};
 	}
 
 	function generateGraph() {
