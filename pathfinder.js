@@ -1,4 +1,4 @@
-let rows = 15;
+let rows = 10;
 let cols = 10;
 let obstacleChance = 0.3;
 var field = [];
@@ -61,9 +61,10 @@ window.onload = () => {
 			clickedAt.y = mouseAt.y;
 			oct.fillStyle = 'blue';
 			oct.fillRect(mouseAt.x * squareWidth, mouseAt.y * squareHeight, squareWidth, squareHeight);
-		}
-		if (lastClickedAt.x != -1 && lastClickedAt.y != -1) {
-			findPath(lastClickedAt.y * cols + lastClickedAt.x, clickedAt.y * cols + clickedAt.x);
+			if (lastClickedAt.x != -1 && lastClickedAt.y != -1 && field) {
+				let dist = findPath(lastClickedAt.y * cols + lastClickedAt.x, clickedAt.y * cols + clickedAt.x);
+				console.log('Result:' + dist);
+			}
 		}
 	}
 
@@ -94,8 +95,40 @@ window.onload = () => {
 	}
 
 	function findPath(v1, v2) {
-		console.log(v1 + ' ' + v2);
-		//run dijkstra
+		let dist = [];
+		let queue = [];
+		for (let i = 0; i < graph.length; i++) {
+			dist.push(Number.MAX_SAFE_INTEGER);
+		}
+		dist[v1] = 0;
+		queue.unshift(v1);
+
+		while (queue.length > 0) {
+			let v = queue[0];
+			for (let i = 1; i < queue.length; i++) {
+				if (dist[queue[i]] < dist[v]) {
+					v = queue[i];
+				}
+			}
+			queue.splice(queue.indexOf(v), 1);
+
+			let found = false;
+			graph[v].forEach((u) => {
+				let alt = dist[v] + 1;
+				if (alt < dist[u]) {
+					dist[u] = alt;
+					queue.unshift(u);
+					if (u == v2) {
+						found = true;
+						return;
+					}
+				}
+			});
+			if (found === true) {
+				return dist[v2];
+			}
+		}
+		return 'No path found';
 	}
 
 	function generateGraph() {
@@ -134,3 +167,14 @@ window.onload = () => {
 		}
 	}
 };
+
+function arrayMin(arr) {
+	if (arr.length <= 0) {
+		throw 'Array length is ' + arr.length;
+	}
+	let min = arr[0];
+	for (let i = 1; i < arr.length; i++) {
+		if (arr[i] < min) min = arr[i];
+	}
+	return min;
+}
